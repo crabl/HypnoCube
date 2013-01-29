@@ -1,16 +1,18 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <math.h>
-
+#include <time.h>
+#include <stdlib.h>
 #include "HypnoCube.h"
 
-HypnoCube cube;
+const double PI = 3.1415926535898; // Mmmm... pi.
 
-const double PI = 3.1415926535898;
+HypnoCube cube; // ALL GLORY TO HYPNOCUBE.
 
 void init(void)
 {
-   glShadeModel(GL_SMOOTH);
+   srand(time(NULL)); // Seed PRNG
+   glShadeModel(GL_SMOOTH); // Because we fancy.
 }
 
 void reshape (int w, int h) {
@@ -20,7 +22,8 @@ void reshape (int w, int h) {
    glFrustum (-1.0, 1.0, -1.0, 1.0, 5.0, 35.0);
    glMatrixMode (GL_MODELVIEW);
    glLoadIdentity ();
-   
+
+   // added vars so we can adjustthe camera later
    GLdouble eyeX = 15.0;
    GLdouble eyeY = 10.0;
    GLdouble eyeZ = 10.5;
@@ -34,24 +37,27 @@ void display(void) {
    glutSwapBuffers();
 }
 
-
+/* Cycle through the colors of the cube. Need this because we can't pass
+   member functions to glutIdleFunc */
 void cycle_cube() {
    cube.random();
    glutPostRedisplay();
 }
 
-/* easter egg.. */
+/* Easter egg... please disregard :) */
 bool spinning = false;
 void spin_cube() {
    cube.rotate(1, 0, 1, 0);
    glutPostRedisplay();
 }   
 
+/* Ditto */
 void spin_and_flash() {
    spin_cube();
    cycle_cube();
 }
 
+/* Handle keyboard events from the user */
 void keyboard(unsigned char key, int x, int y)
 {
    switch(key) {
@@ -102,6 +108,7 @@ void keyboard(unsigned char key, int x, int y)
       default:
 	 break;
    }
+   
    /* Easter eggs: S (spin), Q (spin cycle) */
    glutPostRedisplay();
 }

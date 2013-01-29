@@ -1,5 +1,6 @@
 #include "ColorTuple.h"
 
+// PRNG method, seeded in init() because seeding is expensive
 GLdouble ColorTuple::random_GLdouble() {
    return rand() / static_cast<GLdouble>(RAND_MAX);
 }

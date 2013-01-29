@@ -50,7 +50,7 @@ void HypnoCube::rotate(GLdouble deg, bool x, bool y, bool z) {
 
 void HypnoCube::draw() {
    // Translate to initial position
-   glTranslatef(initX, initY, initZ);
+   glTranslatef(initX, initY, initZ); // TODO: FIX THIS IT IS BORKED
 
    glPushMatrix();
    glRotatef(rot, rotx, roty, rotz); // TODO
