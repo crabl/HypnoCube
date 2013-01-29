@@ -13,6 +13,7 @@ class HypnoCube {
    void green();
    void blue();
    void random();
+   void rotate(GLdouble deg, bool x, bool y, bool z);
    void toggle_cycle() { cycling = !cycling; }
    bool is_cycling() { return cycling; }
    void draw();
@@ -22,6 +23,11 @@ class HypnoCube {
    GLdouble initZ;
    bool cycling;
    ColorTuple* ct;
+   bool spinning;
+   GLdouble rot;
+   bool rotx;
+   bool roty;
+   bool rotz;
 };
 
 

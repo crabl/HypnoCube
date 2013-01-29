@@ -6,6 +6,7 @@ HypnoCube::HypnoCube() {
 }
 
 HypnoCube::HypnoCube(GLdouble x, GLdouble y, GLdouble z) {
+   // TODO: Check these values for sanity
    initX = x;
    initY = y;
    initZ = z;
@@ -13,6 +14,7 @@ HypnoCube::HypnoCube(GLdouble x, GLdouble y, GLdouble z) {
    ct = new ColorTuple[64];
 }
 
+// Set each light to be red
 void HypnoCube::red() {
    for(int i = 0; i < 64; i++) {
       ct[i].red();
@@ -31,18 +33,29 @@ void HypnoCube::blue() {
    }
 }
 
+// Set each light to have a random color
 void HypnoCube::random() {
    for(int i = 0; i < 64; i++) {
       ct[i].random();
    }
 }
 
+void HypnoCube::rotate(GLdouble deg, bool x, bool y, bool z) {
+   bool is_spinning = true;
+   rot += deg;
+   rotx = x;
+   roty = y;
+   rotz = z;
+}
+
 void HypnoCube::draw() {
+   // Translate to initial position
    glTranslatef(initX, initY, initZ);
 
    glPushMatrix();
+   glRotatef(rot, rotx, roty, rotz); // TODO
    glColor3f(0.0, 0.0, 0.0);
-   glScalef(0.8, 0.2, 0.8);
+   glScalef(0.8, 0.2, 0.8); // TODO: Should implement scaling as well...
    glTranslatef(1.8, -4.0, 1.9);
    glutSolidCube((GLdouble) 4.4);
    glPopMatrix();
@@ -53,6 +66,7 @@ void HypnoCube::draw() {
       for(int j = 0; j < 4; j++) {
 	 for(int k = 0; k < 4; k++) {
 	    glPushMatrix();
+	    glRotatef(rot, rotx, roty, rotz); // TODO
 	    glColor3f(0.2, 0.2, 0.2);
 	    glTranslatef(0.0, 0.0, (GLdouble) k);
 	    glBegin(GL_LINES);
@@ -75,6 +89,7 @@ void HypnoCube::draw() {
       for(int j = 0; j < 4; j++) {
 	 for(int k = 0; k < 4; k++) {
 	    glPushMatrix();
+	    glRotatef(rot, rotx, roty, rotz); // TODO
 	    int index = i*16 + j*4 + k;
 	    glColor3f(ct[index].r(), ct[index].g(), ct[index].b());
 	    glTranslatef((GLdouble) i, (GLdouble) j, (GLdouble) k);

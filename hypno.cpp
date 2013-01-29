@@ -13,8 +13,6 @@ void init(void)
    glShadeModel(GL_SMOOTH);
 }
 
-GLdouble phi = PI/4;
-GLdouble theta = PI/4;
 void reshape (int w, int h) {
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
    glMatrixMode (GL_PROJECTION);
@@ -23,9 +21,9 @@ void reshape (int w, int h) {
    glMatrixMode (GL_MODELVIEW);
    glLoadIdentity ();
    
-   GLdouble eyeX = 2 * 15.0 * cos(phi) * sin(theta);
-   GLdouble eyeY = 2 * 10.0 * sin(phi) * sin(theta);
-   GLdouble eyeZ = 2 * 10.5 * cos(theta);
+   GLdouble eyeX = 15.0;
+   GLdouble eyeY = 10.0;
+   GLdouble eyeZ = 10.5;
    gluLookAt(eyeX, eyeY, eyeZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
@@ -45,17 +43,14 @@ void cycle_cube() {
 /* easter egg.. */
 bool spinning = false;
 void spin_cube() {
-   theta += 0.1;
-   phi -= 0.1;
-   if(theta > 2*PI) {
-      theta -= 2*PI;
-   }
-   if(phi > -2*PI) {
-      phi += 2*PI;
-   }
-   reshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+   cube.rotate(1, 0, 1, 0);
    glutPostRedisplay();
 }   
+
+void spin_and_flash() {
+   spin_cube();
+   cycle_cube();
+}
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -93,10 +88,21 @@ void keyboard(unsigned char key, int x, int y)
 	    glutIdleFunc(NULL);
 	 }
 	 break;
+      case 'q':
+	 if(!spinning) {
+	    spinning = true;
+	    cube.toggle_cycle();
+	    glutIdleFunc(spin_and_flash);
+	 } else {
+	    spinning = false;
+	    cube.toggle_cycle();
+	    glutIdleFunc(NULL);
+	 }
+	 break;
       default:
 	 break;
    }
-
+   /* Easter eggs: S (spin), Q (spin cycle) */
    glutPostRedisplay();
 }
 

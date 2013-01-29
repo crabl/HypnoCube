@@ -5,9 +5,10 @@ GLdouble ColorTuple::random_GLdouble() {
 }
 
 ColorTuple::ColorTuple(GLdouble r=0.0, GLdouble g=0.0, GLdouble b=0.0) {
-   r_val = std::min(r, 1.0);
-   g_val = std::min(g, 1.0);
-   b_val = std::min(b, 1.0);
+   /* Color values should be between 0 and 1 only... not checking at the moment */
+   r_val = r;
+   g_val = g;
+   b_val = b;
 }
 
 void ColorTuple::random() {
@@ -21,7 +22,7 @@ void ColorTuple::red() {
    r_val = 1.0;
    g_val = 0.0;
    b_val = 0.0;
-   is_random = false;
+   is_random = false; // make sure flag is false in non-random cases
 }
 
 void ColorTuple::green() {
