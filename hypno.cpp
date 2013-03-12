@@ -13,11 +13,11 @@
 
 const double PI = 3.1415926535898; // Mmmm... pi.
 
-HypnoCube cube0(0, 2, -2); // ALL GLORY TO HYPNOCUBE.
-HypnoCube cube1(0, 2, 2);
-HypnoCube cube2(0, -2, 2);
-HypnoCube cube3(0, -2, -2);
-HypnoCube cube4(0, 0, 0);
+HypnoCube cube0(0, 5, -5); // ALL GLORY TO HYPNOCUBE.
+HypnoCube cube1(0, 5, 5);
+HypnoCube cube2(0, -5, 5);
+HypnoCube cube3(0, -5, -5);
+HypnoCube cube4(0, 3, 3);
 
 std::vector<HypnoCube*> cubes;
 
@@ -36,7 +36,7 @@ void reshape (int w, int h) {
    glLoadIdentity ();
 
    // added vars so we can adjust the camera later
-   GLdouble eyeX = 25.0;
+   GLdouble eyeX = 35.0;
    GLdouble eyeY = 0.0;
    GLdouble eyeZ = 0.0;
    gluLookAt(eyeX, eyeY, eyeZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
@@ -46,6 +46,8 @@ void display(void) {
    glClear(GL_COLOR_BUFFER_BIT);
    glTranslatef(0.0, 0.0, 0.0);
 
+   /* do some shit here */
+   
    for(cube_in_cubes) {
       (*cube)->draw();
    }
