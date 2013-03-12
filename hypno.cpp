@@ -3,11 +3,23 @@
 #include <math.h>
 #include <time.h>
 #include <stdlib.h>
+#include <vector>
+
 #include "HypnoCube.h"
+
+/* BECAUSE I HATE HOW C++ WORKS WITH VECTORS AND ITERATORS. IT IS ANNOYING */
+#define cube_in_cubes std::vector<HypnoCube*>::iterator cube = cubes.begin(); cube != cubes.end(); ++cube
+/* woot python */
 
 const double PI = 3.1415926535898; // Mmmm... pi.
 
-HypnoCube cube; // ALL GLORY TO HYPNOCUBE.
+HypnoCube cube0(0, 2, -2); // ALL GLORY TO HYPNOCUBE.
+HypnoCube cube1(0, 2, 2);
+HypnoCube cube2(0, -2, 2);
+HypnoCube cube3(0, -2, -2);
+HypnoCube cube4(0, 0, 0);
+
+std::vector<HypnoCube*> cubes;
 
 void init(void)
 {
@@ -19,35 +31,45 @@ void reshape (int w, int h) {
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
-   glFrustum (-1.0, 1.0, -1.0, 1.0, 5.0, 35.0);
+   glFrustum (-1.0, 1.0, -1.0, 1.0, 5.0, 40.0);
    glMatrixMode (GL_MODELVIEW);
    glLoadIdentity ();
 
-   // added vars so we can adjustthe camera later
-   GLdouble eyeX = 15.0;
-   GLdouble eyeY = 10.0;
-   GLdouble eyeZ = 10.5;
+   // added vars so we can adjust the camera later
+   GLdouble eyeX = 25.0;
+   GLdouble eyeY = 0.0;
+   GLdouble eyeZ = 0.0;
    gluLookAt(eyeX, eyeY, eyeZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 void display(void) {
    glClear(GL_COLOR_BUFFER_BIT);
    glTranslatef(0.0, 0.0, 0.0);
-   cube.draw();
+
+   for(cube_in_cubes) {
+      (*cube)->draw();
+   }
+   
    glutSwapBuffers();
 }
 
 /* Cycle through the colors of the cube. Need this because we can't pass
    member functions to glutIdleFunc */
 void cycle_cube() {
-   cube.random();
+   for(cube_in_cubes) {
+      (*cube)->random();
+   }
+   
    glutPostRedisplay();
 }
 
-/* Easter egg... please disregard :) */
+/* No longer an Easter egg... please do not disregard :) */
 bool spinning = false;
 void spin_cube() {
-   cube.rotate(1, 0, 1, 0);
+   for(cube_in_cubes) {
+      (*cube)->rotate(1, 0, 0.5, 0);
+   }
+
    glutPostRedisplay();
 }   
 
@@ -62,27 +84,37 @@ void keyboard(unsigned char key, int x, int y)
 {
    switch(key) {
       case 'r':
-	 cube.red();
+	 for(cube_in_cubes) {
+	    (*cube)->red();
+	 }
 	 break;
       case 'g':
-	 cube.green();
+	 for(cube_in_cubes) {
+	    (*cube)->green();
+	 }
 	 break;
       case 'b':
-	 cube.blue();
+	 for(cube_in_cubes) {
+	    (*cube)->blue();
+	 }
 	 break;
       case 'm':
-	 cube.random();
+	 for(cube_in_cubes) {
+	    (*cube)->random();
+	 }
 	 break;
       case 27:
 	 exit(0);
 	 break;
       case 'o':
-	 if(!cube.is_cycling()) {
-	    cube.toggle_cycle();
-	    glutIdleFunc(cycle_cube);
-	 } else {
-	    cube.toggle_cycle();
-	    glutIdleFunc(NULL);
+	 for(cube_in_cubes) {
+	    if(!(*cube)->is_cycling()) {
+	       (*cube)->toggle_cycle();
+	       glutIdleFunc(cycle_cube);
+	    } else {
+	       (*cube)->toggle_cycle();
+	       glutIdleFunc(NULL);
+	    }
 	 }
 	 break;
       case 's':
@@ -97,11 +129,19 @@ void keyboard(unsigned char key, int x, int y)
       case 'q':
 	 if(!spinning) {
 	    spinning = true;
-	    cube.toggle_cycle();
+
+	    for(cube_in_cubes) {
+	       (*cube)->toggle_cycle();
+	    }
+
 	    glutIdleFunc(spin_and_flash);
 	 } else {
 	    spinning = false;
-	    cube.toggle_cycle();
+
+            for(cube_in_cubes) {
+	       (*cube)->toggle_cycle();
+	    }
+	    
 	    glutIdleFunc(NULL);
 	 }
 	 break;
@@ -115,6 +155,12 @@ void keyboard(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
+   cubes.push_back(&cube0); // You
+   cubes.push_back(&cube1); // Only
+   cubes.push_back(&cube2); // Live
+   cubes.push_back(&cube3); // Once
+   cubes.push_back(&cube4); // ! <- exclamation point
+
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
    glutInitWindowSize (500, 500);

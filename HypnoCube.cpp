@@ -1,3 +1,4 @@
+
 #include "HypnoCube.h"
 
 HypnoCube::HypnoCube() {
@@ -50,25 +51,28 @@ void HypnoCube::rotate(GLdouble deg, bool x, bool y, bool z) {
 
 void HypnoCube::draw() {
    // Translate to initial position
-   glTranslatef(initX, initY, initZ); // TODO: FIX THIS IT IS BORKED
-
    glPushMatrix();
+   glTranslatef(initX, initY, initZ);
    glRotatef(rot, rotx, roty, rotz); // TODO
    glColor3f(0.0, 0.0, 0.0);
    glScalef(0.8, 0.2, 0.8); // TODO: Should implement scaling as well...
-   glTranslatef(1.8, -4.0, 1.9);
    glutSolidCube((GLdouble) 4.4);
    glPopMatrix();
 
+   double fudgeX = -1.5;
+   double fudgeY = 0.7;
+   double fudgeZ = -1.5;
+   
    /* Draw wires before drawing lights */
-   glTranslatef(0.0, 0.0, 0.0);
    for(int i = 0; i < 4; i++) {
       for(int j = 0; j < 4; j++) {
 	 for(int k = 0; k < 4; k++) {
 	    glPushMatrix();
+	    glTranslatef(initX, initY, initZ);
 	    glRotatef(rot, rotx, roty, rotz); // TODO
+
 	    glColor3f(0.2, 0.2, 0.2);
-	    glTranslatef(0.0, 0.0, (GLdouble) k);
+	    glTranslatef(fudgeX, fudgeY, ((GLdouble) k) + fudgeZ);
 	    glBegin(GL_LINES);
 	    glVertex2d((GLdouble) j, (GLdouble) i);
 	    glVertex2d((GLdouble) k, (GLdouble) i);
@@ -84,15 +88,18 @@ void HypnoCube::draw() {
    }
 
    /* Draw lights */
-   glTranslatef(0.0, 0.0, 0.0);
+   //glTranslatef(0.0, 0.0, 0.0);
    for(int i = 0; i < 4; i++) {
       for(int j = 0; j < 4; j++) {
 	 for(int k = 0; k < 4; k++) {
 	    glPushMatrix();
+	    glTranslatef(initX, initY, initZ);
 	    glRotatef(rot, rotx, roty, rotz); // TODO
+
 	    int index = i*16 + j*4 + k;
+
 	    glColor3f(ct[index].r(), ct[index].g(), ct[index].b());
-	    glTranslatef((GLdouble) i, (GLdouble) j, (GLdouble) k);
+	    glTranslatef((GLdouble) i + fudgeX, (GLdouble) j + fudgeY, (GLdouble) k + fudgeZ);
 	    glutSolidCube((GLdouble) 0.2);
 	    glPopMatrix();
 	 }
