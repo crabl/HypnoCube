@@ -11,13 +11,13 @@
 #define cube_in_cubes std::vector<HypnoCube*>::iterator cube = cubes.begin(); cube != cubes.end(); ++cube
 /* woot python */
 
-const size_t NUM_HYPNOCUBES = 100;
+const size_t NUM_HYPNOCUBES = 100; // Well, you said more than 5...
 const int VIEW_HEIGHT = 20;
 const int VIEW_WIDTH = 20;
 const int VIEW_DEPTH = 20;
 
 const double PI = 3.1415926535898; // Mmmm... pi.
-const double ROOT_2_INV = 0.7071;
+const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
 
 GLdouble eyeX = 0.0;
 GLdouble eyeY = 0.0;

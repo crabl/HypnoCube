@@ -10,6 +10,8 @@ HypnoCube::HypnoCube(double x, double y, double z, double initRot) {
    initY = y;
    initZ = z;
    rot = initRot;
+
+   // Have to initialize rotx and roz as well because otherwise things will be screwy...
    rotx = 0;
    roty = 1; // We assume that the initial rotation will be about the y-axis (may not be true...)
    rotz = 0;
