@@ -1,17 +1,18 @@
-
 #include "HypnoCube.h"
 
 HypnoCube::HypnoCube() {
-   cycling = false;
    ct = new ColorTuple[64];
 }
 
-HypnoCube::HypnoCube(GLdouble x, GLdouble y, GLdouble z) {
+HypnoCube::HypnoCube(double x, double y, double z, double initRot) {
    // TODO: Check these values for sanity
    initX = x;
    initY = y;
    initZ = z;
-   cycling = false;
+   rot = initRot;
+   rotx = 0;
+   roty = 1; // We assume that the initial rotation will be about the y-axis (may not be true...)
+   rotz = 0;
    ct = new ColorTuple[64];
 }
 
@@ -44,6 +45,10 @@ void HypnoCube::random() {
 void HypnoCube::rotate(GLdouble deg, bool x, bool y, bool z) {
    bool is_spinning = true;
    rot += deg;
+   if(rot > 360) {
+      rot -= 360.0;
+   }
+   
    rotx = x;
    roty = y;
    rotz = z;
@@ -53,9 +58,9 @@ void HypnoCube::draw() {
    // Translate to initial position
    glPushMatrix();
    glTranslatef(initX, initY, initZ);
-   glRotatef(rot, rotx, roty, rotz); // TODO
+   glRotatef(rot, rotx, roty, rotz); // Apply initial rotation
    glColor3f(0.0, 0.0, 0.0);
-   glScalef(0.8, 0.2, 0.8); // TODO: Should implement scaling as well...
+   glScalef(0.8, 0.2, 0.8);
    glutSolidCube((GLdouble) 4.4);
    glPopMatrix();
 
@@ -69,7 +74,7 @@ void HypnoCube::draw() {
 	 for(int k = 0; k < 4; k++) {
 	    glPushMatrix();
 	    glTranslatef(initX, initY, initZ);
-	    glRotatef(rot, rotx, roty, rotz); // TODO
+	    glRotatef(rot, rotx, roty, rotz);
 
 	    glColor3f(0.2, 0.2, 0.2);
 	    glTranslatef(fudgeX, fudgeY, ((GLdouble) k) + fudgeZ);
@@ -88,7 +93,6 @@ void HypnoCube::draw() {
    }
 
    /* Draw lights */
-   //glTranslatef(0.0, 0.0, 0.0);
    for(int i = 0; i < 4; i++) {
       for(int j = 0; j < 4; j++) {
 	 for(int k = 0; k < 4; k++) {

@@ -5,7 +5,7 @@ GLdouble ColorTuple::random_GLdouble() {
    return rand() / static_cast<GLdouble>(RAND_MAX);
 }
 
-ColorTuple::ColorTuple(GLdouble r=0.0, GLdouble g=0.0, GLdouble b=0.0) {
+ColorTuple::ColorTuple(GLdouble r = 0.0, GLdouble g = 0.0, GLdouble b = 0.0) {
    /* Color values should be between 0 and 1 only... not checking at the moment */
    r_val = r;
    g_val = g;
