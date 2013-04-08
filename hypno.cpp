@@ -11,10 +11,12 @@
 #define cube_in_cubes std::vector<HypnoCube*>::iterator cube = cubes.begin(); cube != cubes.end(); ++cube
 /* woot python */
 
-const size_t NUM_HYPNOCUBES = 100; // Well, you said more than 5...
+const size_t NUM_HYPNOCUBES = 10; // Well, you said more than 5...
 const int VIEW_HEIGHT = 20;
 const int VIEW_WIDTH = 20;
 const int VIEW_DEPTH = 20;
+
+const GLdouble PITCH_YAW_INCREMENT = 0.25;
 
 const double PI = 3.1415926535898; // Mmmm... pi.
 const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
@@ -22,6 +24,14 @@ const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
 GLdouble eyeX = 0.0;
 GLdouble eyeY = 0.0;
 GLdouble eyeZ = 20.0;
+
+GLdouble centerX = 0.0;
+GLdouble centerY = 0.0;
+GLdouble centerZ = 0.0;
+
+GLdouble vupX = 0.0;
+GLdouble vupY = 1.0;
+GLdouble vupZ = 0.0;
 
 std::vector<HypnoCube*> cubes;
 
@@ -41,7 +51,7 @@ void display(void) {
    glClear(GL_COLOR_BUFFER_BIT);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
-   gluLookAt(eyeX, eyeY, eyeZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+   gluLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, vupX, vupY, vupZ);
    
    glTranslatef(0.0, 0.0, 0.0);
 
@@ -119,88 +129,146 @@ void spin_and_flash() {
 }
 
 void move_forward() {
-   eyeZ -= 0.5;
+   eyeZ -= 0.45;
    glutPostRedisplay();
 }
 
 void move_backward() {
-   eyeZ += 0.5;
+   eyeZ += 0.45;
    glutPostRedisplay();
+}
+
+void roll_left() {
+  vupX += 0.05;
+  glutPostRedisplay();
+}
+
+void roll_right() {
+  vupX -= 0.05;
+  glutPostRedisplay();
+}
+
+void pitch_up() {
+  centerY += PITCH_YAW_INCREMENT;
+  glutPostRedisplay();
+}
+
+void pitch_down() {
+  centerY -= PITCH_YAW_INCREMENT;
+  glutPostRedisplay();
+}
+
+void yaw_left() {
+  centerX -= PITCH_YAW_INCREMENT;
+  glutPostRedisplay();
+}
+
+void yaw_right() {
+  centerX += PITCH_YAW_INCREMENT;
+  glutPostRedisplay();
 }
 
 /* Handle keyboard events from the user */
 void keyboard(unsigned char key, int x, int y) {
-   switch(key) {
-      case 'r':
-	 for(cube_in_cubes) {
-	    (*cube)->red();
-	 }
-	 break;
-      case 'g':
-	 for(cube_in_cubes) {
-	    (*cube)->green();
-	 }
-	 break;
-      case 'b':
-	 for(cube_in_cubes) {
-	    (*cube)->blue();
-	 }
-	 break;
-      case 'm':
-	 for(cube_in_cubes) {
-	    (*cube)->random();
-	 }
-	 break;
-      case 27:
-	 exit(0);
-	 break;
-      case 'o':
-	 if(!cycling) {
-	    cycling = true;
-	    if(!spinning) {
-	       glutIdleFunc(cycle_cube);
-	    } else {
-	       glutIdleFunc(spin_and_flash);
-	    }
-	 } else {
-	    cycling = false;
-	    if(!spinning) {
-	       glutIdleFunc(NULL);
-	    } else {
-	       glutIdleFunc(spin_cube);
-	    }
-	 }
-	 break;
-      case 's':
-	 // S IS FOR SWAGGER
-	 if(!spinning) {
-	    spinning = true;
-	    if(!cycling) {
-	       glutIdleFunc(spin_cube);
-	    } else {
-	       glutIdleFunc(spin_and_flash);
-	    }
-	 } else {
-	    spinning = false;
-	    if(!cycling) {
-	       glutIdleFunc(NULL);
-	    } else {
-	       glutIdleFunc(cycle_cube);
-	    }
-	 }
-	 break;
-      case 'f':
-	 move_forward();
-	 break;
-      case 32:
-	 move_backward();
-	 break;
-      default:
-	 break;
-   }
-   
-   glutPostRedisplay();
+  switch(key) {
+  case 'r':
+    for(cube_in_cubes) {
+      (*cube)->red();
+    }
+    break;
+  case 'g':
+    for(cube_in_cubes) {
+      (*cube)->green();
+    }
+    break;
+  case 'b':
+    for(cube_in_cubes) {
+      (*cube)->blue();
+    }
+    break;
+  case 'm':
+    for(cube_in_cubes) {
+      (*cube)->random();
+    }
+    break;
+  case 27:
+    exit(0);
+    break;
+  case 'z': 
+    roll_left();
+    break; 
+  case 'x': 
+    roll_right();
+    break; 
+  case 'o':
+    if(!cycling) {
+      cycling = true;
+      if(!spinning) {
+	glutIdleFunc(cycle_cube);
+      } else {
+	glutIdleFunc(spin_and_flash);
+      }
+    } else {
+      cycling = false;
+      if(!spinning) {
+	glutIdleFunc(NULL);
+      } else {
+	glutIdleFunc(spin_cube);
+      }
+    }
+    break;
+  case 's':
+    // S IS FOR SWAGGER
+    if(!spinning) {
+      spinning = true;
+      if(!cycling) {
+	glutIdleFunc(spin_cube);
+      } else {
+	glutIdleFunc(spin_and_flash);
+      }
+    } else {
+      spinning = false;
+      if(!cycling) {
+	glutIdleFunc(NULL);
+      } else {
+	glutIdleFunc(cycle_cube);
+      }
+    }
+    break;
+  case 'f':
+    move_forward();
+    break;
+  case 32:
+    move_backward();
+    break;
+  default:
+    break;
+  }
+  
+  glutPostRedisplay();
 }
+
+void specialKeyboard(int key, int x, int y) {
+  switch(key) {
+  case GLUT_KEY_UP:
+    pitch_up();
+    break;
+  case GLUT_KEY_DOWN:
+    pitch_down();
+    break;
+  case GLUT_KEY_LEFT:
+    yaw_left();
+    break;
+  case GLUT_KEY_RIGHT:
+    yaw_right();
+    break;
+  default:
+    break;
+  }
+
+  glutPostRedisplay();
+}
+
 
 int main(int argc, char** argv) {
 
@@ -230,7 +298,7 @@ int main(int argc, char** argv) {
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
-
+   glutSpecialFunc(specialKeyboard);
    glutMainLoop();
    return 0;
 }

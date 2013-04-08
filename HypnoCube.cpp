@@ -113,3 +113,7 @@ void HypnoCube::draw() {
    }
    
 }
+
+bool HypnoCube::in_range(GLdouble eye_x, GLdouble eye_y, GLdouble eye_z, GLdouble eye_theta) {
+  return false;
+}
