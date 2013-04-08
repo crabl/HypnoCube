@@ -128,6 +128,8 @@ void spin_and_flash() {
    cycle_cube();
 }
 
+
+/*************** MOVEMENT FUNCTIONS *********************/
 void move_forward() {
    eyeZ -= 0.45;
    glutPostRedisplay();
@@ -168,9 +170,52 @@ void yaw_right() {
   glutPostRedisplay();
 }
 
+/****************************************************/
+
+/*********** FPS FUNCTIONS **************************/
+
+bool looking_at(HypnoCube* h) {
+  GLdouble tol = 5;
+  GLdouble hx = h->get_x();
+  GLdouble hy = h->get_y();
+
+  GLdouble x = centerX;
+  GLdouble y = centerY;
+  if(x > hx - tol && x < hx + tol) {
+    if(y > hy - tol && y < hy + tol) {
+      return true;
+    }
+  }
+
+  return false;
+
+}
+
+void shoot_hypnocube() {
+  for(cube_in_cubes) {
+    if(looking_at(*cube)) {
+      cubes.erase(cube);
+      break;
+    }
+  }
+}
+
+void create_hypnocube() {
+  HypnoCube* hc = new HypnoCube(centerX, centerY, centerZ, 0);
+  cubes.push_back(hc);
+
+  glutPostRedisplay();
+}
+
 /* Handle keyboard events from the user */
 void keyboard(unsigned char key, int x, int y) {
   switch(key) {
+  case 'c':
+    create_hypnocube();
+    break;
+  case 'q':
+    shoot_hypnocube();
+    break;
   case 'r':
     for(cube_in_cubes) {
       (*cube)->red();

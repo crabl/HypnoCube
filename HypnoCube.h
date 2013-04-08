@@ -15,7 +15,9 @@ class HypnoCube {
    void random();
    void rotate(GLdouble deg, bool x, bool y, bool z);
    void draw();
-   bool in_range(GLdouble, GLdouble, GLdouble, GLdouble);
+   GLdouble get_x() { return initX; }
+   GLdouble get_y() { return initY; }
+   GLdouble get_z() { return initZ; }
   private:
    GLdouble initX;
    GLdouble initY;
