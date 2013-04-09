@@ -1,1 +1,0 @@
-g++ -o$1 $1.cpp -lX11 -lXmu -lglut -lGL -lGLU -lm 
