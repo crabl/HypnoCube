@@ -24,6 +24,9 @@ const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
 const GLdouble ROTATE_INCREMENT = PI/20;
 const GLdouble MOVE_FACTOR = 0.45;
 
+const GLdouble ANGLE_THRESHOLD = 0.2;
+const GLdouble CUBE_CREATE_DISTANCE = 10;
+
 struct vect3d {
   GLdouble x;
   GLdouble y;
@@ -164,6 +167,8 @@ void spin_and_flash() {
 }
 
 /*************** VECTOR FUNCTIONS ************************/
+
+/* Steve's code... wow this is ugly. Modified to use my vect3d struct */
 void rotate_about(vect3d& v, const vect3d& u, float Theta)
 {   
   GLdouble uX, uY, uZ;
@@ -178,7 +183,7 @@ void rotate_about(vect3d& v, const vect3d& u, float Theta)
   lv1=v.y;
   lv2=v.z;
 
-  v.x = lv0*(uX*uX +  ct      * (1.0-uX*uX))  +
+  v.x = lv0*(uX*uX +  ct * (1.0-uX*uX))  +
     lv1*(uX*uY * (1.0-ct) - uZ*st)+
     lv2*(uZ*uX * (1.0-ct) + uY*st);
 
@@ -206,6 +211,15 @@ void cross_product(vect3d& result, const vect3d& u, const vect3d& v) {
   result.x = det(u.y, u.z, v.y, v.z);
   result.y = (-1.0) * det(u.x, u.z, v.x, v.z);
   result.z = det(u.x, u.y, v.x, v.y);
+}
+
+GLdouble dot_product(const vect3d& u, const vect3d& v) {
+  GLdouble dot = u.x * v.x + u.y * v.y + u.z * v.z;
+  return dot;
+}
+
+GLdouble mag(const vect3d& v) {
+  return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
 void recompute_vrp() {
@@ -276,16 +290,20 @@ void yaw_right() {
 /*********** FPS FUNCTIONS **************************/
 
 bool looking_at(HypnoCube* h) {
-  GLdouble tol = 5;
-  GLdouble hx = h->get_x();
-  GLdouble hy = h->get_y();
+  vect3d hc;
+  hc.x = h->get_x() - cam.x;
+  hc.y = h->get_y() - cam.y;
+  hc.z = h->get_z() - cam.z;
 
-  GLdouble x = cam.x + vpn.x;
-  GLdouble y = cam.y + vpn.y;
-  if(x > hx - tol && x < hx + tol) {
-    if(y > hy - tol && y < hy + tol) {
-      return true;
-    }
+  /* calculate the angle difference between vrp and hypnocube */
+  GLdouble dp = dot_product(hc, vpn);
+  GLdouble magnitudes = mag(hc) * mag(vpn);
+  GLdouble theta = std::acos(dp / magnitudes);
+  
+  // std::cout << "Theta: " << theta << std::endl;
+
+  if(theta < ANGLE_THRESHOLD) {
+    return true;
   }
 
   return false;
@@ -295,9 +313,7 @@ bool looking_at(HypnoCube* h) {
 void shoot_hypnocube() {
   for(cube_in_cubes) {
     if(looking_at(*cube)) {
-      if(DEBUG) {
-	std::cout << "KILLED HYPNOCUBE!" << std::endl;
-      }
+      // std::cout << "KILLED HYPNOCUBE!" << std::endl;
       cubes.erase(cube);
       break;
     }
@@ -305,7 +321,9 @@ void shoot_hypnocube() {
 }
 
 void create_hypnocube() {
-  HypnoCube* hc = new HypnoCube(vpn.x, vpn.y, vpn.z, 0);
+  HypnoCube* hc = new HypnoCube(cam.x + vpn.x * CUBE_CREATE_DISTANCE, 
+				cam.y + vpn.y * CUBE_CREATE_DISTANCE, 
+				cam.z + vpn.z * CUBE_CREATE_DISTANCE, 0);
   cubes.push_back(hc);
 
   glutPostRedisplay();
