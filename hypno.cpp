@@ -4,40 +4,68 @@
 #include <time.h>
 #include <stdlib.h>
 #include <vector>
-
+#include <cmath>
 #include "HypnoCube.h"
 
 /* BECAUSE I HATE HOW C++ WORKS WITH VECTORS AND ITERATORS. IT IS ANNOYING */
 #define cube_in_cubes std::vector<HypnoCube*>::iterator cube = cubes.begin(); cube != cubes.end(); ++cube
 /* woot python */
 
+const bool DEBUG = false;
+
 const size_t NUM_HYPNOCUBES = 10; // Well, you said more than 5...
 const int VIEW_HEIGHT = 20;
 const int VIEW_WIDTH = 20;
 const int VIEW_DEPTH = 20;
 
-const GLdouble PITCH_YAW_INCREMENT = 0.25;
-
 const double PI = 3.1415926535898; // Mmmm... pi.
 const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
 
-GLdouble eyeX = 0.0;
-GLdouble eyeY = 0.0;
-GLdouble eyeZ = 20.0;
+const GLdouble ROTATE_INCREMENT = PI/20;
+const GLdouble MOVE_FACTOR = 0.45;
 
-GLdouble centerX = 0.0;
-GLdouble centerY = 0.0;
-GLdouble centerZ = 0.0;
+struct vect3d {
+  GLdouble x;
+  GLdouble y;
+  GLdouble z;
+} cam, vpn, vup, vrp, x_axis, y_axis, z_axis;
 
-GLdouble vupX = 0.0;
-GLdouble vupY = 1.0;
-GLdouble vupZ = 0.0;
 
 std::vector<HypnoCube*> cubes;
 
 void init(void) {
    srand(time(NULL)); // Seed PRNG
    glShadeModel(GL_SMOOTH); // Because we fancy.
+
+   cam.x = 0.0;
+   cam.y = 0.0;
+   cam.z = 20.0;
+
+   vpn.x = 0.0;
+   vpn.y = 0.0;
+   vpn.z = -1.0;
+
+   vup.x = 0.0;
+   vup.y = 1.0;
+   vup.z = 0.0;
+
+   vrp.x = 1.0;
+   vrp.y = 0.0;
+   vrp.z = 0.0;
+
+   /* Some axes in case we need them */
+   x_axis.x = 1.0;
+   x_axis.y = 0.0;
+   x_axis.z = 0.0;
+
+   y_axis.x = 0.0;
+   y_axis.y = 1.0;
+   y_axis.z = 0.0;
+
+   z_axis.x = 0.0;
+   z_axis.y = 0.0;
+   z_axis.z = 1.0;
+
 }
 
 void reshape (int w, int h) {
@@ -48,10 +76,17 @@ void reshape (int w, int h) {
 }
 
 void display(void) {
+  if(DEBUG) {
+    std::cout << "CAM: " << cam.x << " " << cam.y << " " << cam.z << std::endl;
+    std::cout << "VPN: " << vpn.x << " " << vpn.y << " " << vpn.z << std::endl;
+    std::cout << "VUP: " << vup.x << " " << vup.y << " " << vup.z << std::endl;
+    std::cout << "VRP: " << vrp.x << " " << vrp.y << " " << vrp.z << std::endl;
+  }
+
    glClear(GL_COLOR_BUFFER_BIT);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
-   gluLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, vupX, vupY, vupZ);
+   gluLookAt(cam.x, cam.y, cam.z, cam.x+vpn.x, cam.y+vpn.y, cam.z+vpn.z, vup.x, vup.y, vup.z);
    
    glTranslatef(0.0, 0.0, 0.0);
 
@@ -128,45 +163,111 @@ void spin_and_flash() {
    cycle_cube();
 }
 
+/*************** VECTOR FUNCTIONS ************************/
+void rotate_about(vect3d& v, const vect3d& u, float Theta)
+{   
+  GLdouble uX, uY, uZ;
+  uX = u.x;
+  uY = u.y;
+  uZ = u.z;
+  float ct,st,lv0,lv1,lv2;
+  ct= cos(Theta);
+  st= sin(Theta);
+
+  lv0=v.x;
+  lv1=v.y;
+  lv2=v.z;
+
+  v.x = lv0*(uX*uX +  ct      * (1.0-uX*uX))  +
+    lv1*(uX*uY * (1.0-ct) - uZ*st)+
+    lv2*(uZ*uX * (1.0-ct) + uY*st);
+
+  v.y = lv0*(uX*uY * (1.0-ct) + uZ*st)+
+    lv1*(uY*uY +  ct      * (1.0-uY*uY))  +
+    lv2*(uY*uZ * (1.0-ct) - uX*st);
+
+  v.z = lv0*(uZ*uX * (1.0-ct) - uY*st)+
+    lv1*(uY*uZ * (1.0-ct) + uX*st)+
+    lv2*(uZ*uZ +  ct      * (1.0-uZ*uZ));
+}
+
+/*
+  Computes the determinant:
+  
+  | a  b |
+  | c  d | = det(a,b,c,d)
+  
+ */
+GLdouble det(GLdouble a, GLdouble b, GLdouble c, GLdouble d) {
+  return a*d - b*c;
+}
+
+void cross_product(vect3d& result, const vect3d& u, const vect3d& v) {
+  result.x = det(u.y, u.z, v.y, v.z);
+  result.y = (-1.0) * det(u.x, u.z, v.x, v.z);
+  result.z = det(u.x, u.y, v.x, v.y);
+}
+
+void recompute_vrp() {
+  cross_product(vrp, vpn, vup);
+}
+
+/*********************************************************/
+
 
 /*************** MOVEMENT FUNCTIONS *********************/
 void move_forward() {
-   eyeZ -= 0.45;
-   glutPostRedisplay();
+  cam.x += MOVE_FACTOR * vpn.x;
+  cam.y += MOVE_FACTOR * vpn.y;
+  cam.z += MOVE_FACTOR * vpn.z;
+
+  glutPostRedisplay();
 }
 
 void move_backward() {
-   eyeZ += 0.45;
-   glutPostRedisplay();
+  cam.x -= MOVE_FACTOR * vpn.x;
+  cam.y -= MOVE_FACTOR * vpn.y;
+  cam.z -= MOVE_FACTOR * vpn.z;
+  glutPostRedisplay();
 }
 
 void roll_left() {
-  vupX += 0.05;
+  rotate_about(vup, vpn, -ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
 void roll_right() {
-  vupX -= 0.05;
+  rotate_about(vup, vpn, ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
 void pitch_up() {
-  centerY += PITCH_YAW_INCREMENT;
+  recompute_vrp();
+  rotate_about(vup, vrp, ROTATE_INCREMENT);
+  rotate_about(vpn, vrp, ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
 void pitch_down() {
-  centerY -= PITCH_YAW_INCREMENT;
+  recompute_vrp();
+  rotate_about(vup, vrp, -ROTATE_INCREMENT);
+  rotate_about(vpn, vrp, -ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
 void yaw_left() {
-  centerX -= PITCH_YAW_INCREMENT;
+  recompute_vrp();
+  /* rotate about y-axis, NOT VUP!!!! */
+  rotate_about(vpn, y_axis, ROTATE_INCREMENT);
+  rotate_about(vup, y_axis, ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
 void yaw_right() {
-  centerX += PITCH_YAW_INCREMENT;
+  recompute_vrp();
+  /* we want to rotate about the y-axis, not VUP! */
+  rotate_about(vpn, y_axis, -ROTATE_INCREMENT);
+  rotate_about(vup, y_axis, -ROTATE_INCREMENT);
   glutPostRedisplay();
 }
 
@@ -179,8 +280,8 @@ bool looking_at(HypnoCube* h) {
   GLdouble hx = h->get_x();
   GLdouble hy = h->get_y();
 
-  GLdouble x = centerX;
-  GLdouble y = centerY;
+  GLdouble x = cam.x + vpn.x;
+  GLdouble y = cam.y + vpn.y;
   if(x > hx - tol && x < hx + tol) {
     if(y > hy - tol && y < hy + tol) {
       return true;
@@ -194,6 +295,9 @@ bool looking_at(HypnoCube* h) {
 void shoot_hypnocube() {
   for(cube_in_cubes) {
     if(looking_at(*cube)) {
+      if(DEBUG) {
+	std::cout << "KILLED HYPNOCUBE!" << std::endl;
+      }
       cubes.erase(cube);
       break;
     }
@@ -201,7 +305,7 @@ void shoot_hypnocube() {
 }
 
 void create_hypnocube() {
-  HypnoCube* hc = new HypnoCube(centerX, centerY, centerZ, 0);
+  HypnoCube* hc = new HypnoCube(vpn.x, vpn.y, vpn.z, 0);
   cubes.push_back(hc);
 
   glutPostRedisplay();
