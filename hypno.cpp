@@ -21,7 +21,7 @@ const int VIEW_DEPTH = 20;
 const double PI = 3.1415926535898; // Mmmm... pi.
 const double ROOT_2_INV = 0.7071; // 1/sqrt(2)... not so delicious.
 
-const GLdouble ROTATE_INCREMENT = PI/20;
+const GLdouble ROTATE_INCREMENT = PI/40;
 const GLdouble MOVE_FACTOR = 0.45;
 
 const GLdouble ANGLE_THRESHOLD = 0.2;
@@ -75,7 +75,7 @@ void reshape (int w, int h) {
    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glFrustum(-1.0, 1.0, -1.0, 1.0, 1.5, 50.0);
+   glFrustum(-1.0, 1.0, -1.0, 1.0, 1.5, 100.0);
 }
 
 void display(void) {
@@ -207,17 +207,21 @@ GLdouble det(GLdouble a, GLdouble b, GLdouble c, GLdouble d) {
   return a*d - b*c;
 }
 
+
+/* Computes the cross product of two vectors using determinants */
 void cross_product(vect3d& result, const vect3d& u, const vect3d& v) {
   result.x = det(u.y, u.z, v.y, v.z);
   result.y = (-1.0) * det(u.x, u.z, v.x, v.z);
   result.z = det(u.x, u.y, v.x, v.y);
 }
 
+/* Computes the dot product */
 GLdouble dot_product(const vect3d& u, const vect3d& v) {
   GLdouble dot = u.x * v.x + u.y * v.y + u.z * v.z;
   return dot;
 }
 
+/* Magnitude of a vector */
 GLdouble mag(const vect3d& v) {
   return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
@@ -301,7 +305,7 @@ bool looking_at(HypnoCube* h) {
   GLdouble theta = std::acos(dp / magnitudes);
   
   // std::cout << "Theta: " << theta << std::endl;
-
+  /* If it's within a certain threshold, kill the cube */
   if(theta < ANGLE_THRESHOLD) {
     return true;
   }
@@ -315,7 +319,7 @@ void shoot_hypnocube() {
     if(looking_at(*cube)) {
       // std::cout << "KILLED HYPNOCUBE!" << std::endl;
       cubes.erase(cube);
-      break;
+      break; // only kill one at a time!
     }
   }
 }
