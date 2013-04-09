@@ -86,7 +86,7 @@ void display(void) {
     std::cout << "VRP: " << vrp.x << " " << vrp.y << " " << vrp.z << std::endl;
   }
 
-   glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
    gluLookAt(cam.x, cam.y, cam.z, cam.x+vpn.x, cam.y+vpn.y, cam.z+vpn.z, vup.x, vup.y, vup.z);
@@ -459,12 +459,17 @@ int main(int argc, char** argv) {
    }
    
    glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); // every day i'm buffering
    glutInitWindowSize(500, 500);
    glutInitWindowPosition(100, 100);
    glutCreateWindow(argv[0]);
    init();
-   glEnable(GL_CULL_FACE); 
+   glEnable(GL_CULL_FACE);
+
+   // enable depth buffering
+   glEnable(GL_DEPTH_TEST);
+   glDepthMask(GL_TRUE);
+
    glClearColor(1.0, 1.0, 1.0, 1.0);
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
